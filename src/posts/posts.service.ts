@@ -13,6 +13,7 @@ export class PostsService {
     excerpt?: string;
     published: boolean;
     authorId: number;
+    categoryId: number;
   }): Promise<Post> {
     return this.prisma.post.create({
       data,

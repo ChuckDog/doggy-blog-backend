@@ -28,6 +28,7 @@ export class PostsController {
       excerpt?: string;
       published: boolean;
       authorId: number;
+      categoryId: number;
     },
   ): Promise<PrismaPost> {
     return this.postsService.createPost({
@@ -37,6 +38,7 @@ export class PostsController {
       excerpt: body.excerpt,
       published: body.published,
       authorId: body.authorId,
+      categoryId: body.categoryId,
     });
   }
 

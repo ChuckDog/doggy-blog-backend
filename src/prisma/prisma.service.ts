@@ -5,9 +5,14 @@ import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient {
   constructor() {
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL as string,
-    });
-    super({ adapter });
+    const url = process.env.DATABASE_URL;
+    if (url && url.startsWith('postgres')) {
+      const adapter = new PrismaPg({
+        connectionString: url,
+      });
+      super({ adapter });
+    } else {
+      super();
+    }
   }
 }

@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import cookieParser from 'cookie-parser';
-import {urlencoded, json} from 'express';
+import { urlencoded, json } from 'express';
 import helmet from 'helmet';
-import {DocumentBuilder, SwaggerModule, SwaggerCustomOptions} from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  SwaggerModule,
+  SwaggerCustomOptions,
+} from '@nestjs/swagger';
+// PrismaService removed for in-memory backend run
 
 const enum Environment {
   Development = 'development',
@@ -11,15 +16,20 @@ const enum Environment {
 }
 const environment = process.env.ENVIRONMENT ?? Environment.Development;
 const port = parseInt(process.env.PORT ?? '') || 3000;
-const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '').split(',');
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ?? 'http://localhost:3001'
+).split(',');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
-  app.use(json({limit: '10mb'}));
-  app.use(urlencoded({limit: '10mb', extended: true}));
-  app.enableCors({credentials: true, origin: allowedOrigins});
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ limit: '10mb', extended: true }));
+  app.enableCors({ credentials: true, origin: allowedOrigins });
+
+  // no DB bootstrap required
+
   if (environment === Environment.Production) {
     app.use(helmet());
   } else if (environment === Environment.Development) {
