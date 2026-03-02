@@ -15,9 +15,9 @@ const enum Environment {
   Production = 'production',
 }
 const environment = process.env.ENVIRONMENT ?? Environment.Development;
-const port = parseInt(process.env.PORT ?? '') || 3000;
+const port = parseInt(process.env.PORT ?? '') || 3001;
 const allowedOrigins = (
-  process.env.ALLOWED_ORIGINS ?? 'http://localhost:3001'
+  process.env.ALLOWED_ORIGINS ?? 'http://localhost:3000'
 ).split(',');
 
 async function bootstrap() {
