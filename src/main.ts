@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import cookieParser from 'cookie-parser';
@@ -26,7 +27,15 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));
-  app.enableCors({ credentials: true, origin: allowedOrigins });
+  app.enableCors({
+    credentials: true,
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:4001',
+      'http://localhost:3021',
+      'http://localhost:3002',
+    ],
+  });
 
   // no DB bootstrap required
 

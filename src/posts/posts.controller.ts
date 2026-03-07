@@ -3,23 +3,29 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Param,
   Body,
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { Post as PrismaPost } from '@prisma/client';
 import { PostsService } from './posts.service.js';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createPost(
+    @Request() req,
     @Body()
     body: {
       title: string;
@@ -27,7 +33,6 @@ export class PostsController {
       content: string;
       excerpt?: string;
       published: boolean;
-      authorId: number;
       categoryId: number;
     },
   ): Promise<PrismaPost> {
@@ -37,7 +42,7 @@ export class PostsController {
       content: body.content,
       excerpt: body.excerpt,
       published: body.published,
-      authorId: body.authorId,
+      authorId: req.user.userId,
       categoryId: body.categoryId,
     });
   }
@@ -64,6 +69,7 @@ export class PostsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async updatePost(
     @Param('id') id: string,
@@ -74,6 +80,7 @@ export class PostsController {
       content?: string;
       excerpt?: string;
       published?: boolean;
+      categoryId?: number;
     },
   ): Promise<PrismaPost> {
     return this.postsService.updatePost(Number(id), {
@@ -82,10 +89,37 @@ export class PostsController {
       content: body.content,
       excerpt: body.excerpt,
       published: body.published,
+      categoryId: body.categoryId,
+    });
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async patchPost(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+      slug?: string;
+      content?: string;
+      excerpt?: string;
+      published?: boolean;
+      categoryId?: number;
+    },
+  ): Promise<PrismaPost> {
+    return this.postsService.updatePost(Number(id), {
+      title: body.title,
+      slug: body.slug,
+      content: body.content,
+      excerpt: body.excerpt,
+      published: body.published,
+      categoryId: body.categoryId,
     });
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async deletePost(@Param('id') id: string): Promise<PrismaPost> {
     return this.postsService.deletePost(Number(id));

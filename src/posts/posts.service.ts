@@ -71,6 +71,7 @@ export class PostsService {
       content?: string;
       excerpt?: string;
       published?: boolean;
+      categoryId?: number;
     },
   ): Promise<Post> {
     return this.prisma.post.update({
