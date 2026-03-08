@@ -20,13 +20,21 @@ export class PostsService {
     });
   }
 
-  async getAllPosts(): Promise<Post[]> {
-    return this.prisma.post.findMany({
+  async getAllPosts(): Promise<any[]> {
+    const posts = await this.prisma.post.findMany({
       include: {
         author: true,
         comments: true,
+        _count: {
+          select: { likes: true },
+        },
       },
     });
+
+    return posts.map((post) => ({
+      ...post,
+      likesCount: post._count.likes,
+    }));
   }
 
   async getPublishedPosts(): Promise<Post[]> {
@@ -84,5 +92,67 @@ export class PostsService {
     return this.prisma.post.delete({
       where: { id },
     });
+  }
+
+  async likePost(postId: number, userId: number): Promise<void> {
+    // Check if already liked to avoid error
+    const existingLike = await this.prisma.like.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      return;
+    }
+
+    await this.prisma.like.create({
+      data: {
+        postId,
+        userId,
+      },
+    });
+  }
+
+  async unlikePost(postId: number, userId: number): Promise<void> {
+    try {
+      await this.prisma.like.delete({
+        where: {
+          userId_postId: {
+            userId,
+            postId,
+          },
+        },
+      });
+    } catch (error) {
+      // Ignore if not liked
+    }
+  }
+
+  async getLikeStatus(
+    postId: number,
+    userId?: number,
+  ): Promise<{ count: number; liked: boolean }> {
+    const count = await this.prisma.like.count({
+      where: { postId },
+    });
+
+    let liked = false;
+    if (userId) {
+      const like = await this.prisma.like.findUnique({
+        where: {
+          userId_postId: {
+            userId,
+            postId,
+          },
+        },
+      });
+      liked = !!like;
+    }
+
+    return { count, liked };
   }
 }

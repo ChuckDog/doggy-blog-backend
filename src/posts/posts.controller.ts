@@ -124,4 +124,34 @@ export class PostsController {
   async deletePost(@Param('id') id: string): Promise<PrismaPost> {
     return this.postsService.deletePost(Number(id));
   }
+
+  @Post(':id/like')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async likePost(@Param('id') id: string, @Request() req) {
+    return this.postsService.likePost(Number(id), req.user.userId);
+  }
+
+  @Delete(':id/like')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  async unlikePost(@Param('id') id: string, @Request() req) {
+    return this.postsService.unlikePost(Number(id), req.user.userId);
+  }
+
+  @Get(':id/likes')
+  async getLikesCount(@Param('id') id: string) {
+    const { count } = await this.postsService.getLikeStatus(Number(id));
+    return { count };
+  }
+
+  @Get(':id/is-liked')
+  @UseGuards(AuthGuard('jwt'))
+  async getIsLiked(@Param('id') id: string, @Request() req) {
+    const { liked } = await this.postsService.getLikeStatus(
+      Number(id),
+      req.user.userId,
+    );
+    return { liked };
+  }
 }
